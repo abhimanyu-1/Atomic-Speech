@@ -15,7 +15,7 @@ const STATES = {
   RESULT: 'RESULT',
 };
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://atomic-speech.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:8000' : 'https://atomic-speech.onrender.com');
 
 function App() {
   const [appState, setAppState] = useState(STATES.IDLE);

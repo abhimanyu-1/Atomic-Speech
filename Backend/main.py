@@ -21,7 +21,11 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 # Allow CORS for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://atomic-speech.vercel.app"], 
+    allow_origins=[
+        "https://atomic-speech.vercel.app",
+        "http://localhost:5173",
+        "http://127.0.0.1:5173"
+    ], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -141,7 +145,7 @@ async def analyze_speech(request: Request, audio: UploadFile = File(...), topic:
         @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
         def call_gemini():
             return client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-3.5-flash',
                 contents=[
                     audio_part,
                     prompt
@@ -166,14 +170,80 @@ async def analyze_speech(request: Request, audio: UploadFile = File(...), topic:
                 if hasattr(actual_exc, 'message'):
                     error_msg = actual_exc.message
         
-        print(f"Error calling Gemini API: {error_msg}")
-        # Fallback response in case of error
-        return FeedbackResponse(
-            score=0,
-            improvements=[f"Failed to analyze audio with Gemini AI: {error_msg}"],
-            transcript="(Failed to transcribe due to API error)",
-            ideal_explanation="Failed to generate ideal explanation due to API error."
-        )
+        print(f"Error calling Gemini API: {error_msg}. Falling back to local analysis...")
+        
+        # LOCAL WHISPER FALLBACK (Option 1)
+        try:
+            import tempfile
+            import whisper
+            import os
+            
+            # Save the audio content to a temporary file
+            tmp_path = ""
+            with tempfile.NamedTemporaryFile(delete=False, suffix='.webm') as tmp:
+                tmp.write(audio_content)
+                tmp_path = tmp.name
+                
+            # Run Whisper transcription locally
+            def transcribe_audio():
+                # Load a small, fast model
+                model = whisper.load_model("base")
+                return model.transcribe(tmp_path)
+            
+            result = await run_in_threadpool(transcribe_audio)
+            transcript_text = result["text"].strip()
+            
+            # Clean up temp file
+            try:
+                os.remove(tmp_path)
+            except:
+                pass
+                
+            # Basic Heuristics based on transcript
+            word_count = len(transcript_text.split())
+            score = min(10.0, max(1.0, (word_count / 130.0) * 10)) # Assuming 130 words per minute is ideal
+            score = round(score, 1)
+            
+            improvements = ["(Generated via Local Fallback AI)"]
+            if word_count < 50:
+                improvements.append("Try to elaborate more on the topic. Your speech was a bit too short to evaluate fully.")
+            elif word_count > 160:
+                improvements.append("You are speaking very quickly. Try to slow down your pace to ensure maximum clarity.")
+            else:
+                improvements.append("Great pacing and length! Keep practicing your delivery to make it even more engaging.")
+                
+            if "um" in transcript_text.lower() or "uh" in transcript_text.lower():
+                improvements.append("Try to reduce the use of filler words like 'um' and 'uh'.")
+                
+            return FeedbackResponse(
+                score=score,
+                improvements=improvements,
+                transcript=transcript_text or "(No speech detected)",
+                ideal_explanation=f"This is a local fallback analysis because the main AI is busy. An ideal explanation for {topic} would cover the main concepts clearly, using analogies where appropriate."
+            )
+            
+        except Exception as fallback_error:
+            # If whisper fails (e.g., missing ffmpeg on the system)
+            print(f"Local fallback (Whisper) also failed: {fallback_error}")
+            
+            # Fallback to pure heuristic based on file size if transcription is impossible
+            size_kb = len(audio_content) / 1024
+            estimated_words = int(size_kb / 2) # Rough heuristic for webm audio size to words
+            score = min(8.0, max(4.0, (estimated_words / 130.0) * 8)) 
+            score = round(score, 1)
+            
+            improvements = [
+                "(Generated via Basic Fallback)",
+                "We could not transcribe your audio locally (missing dependencies like ffmpeg).",
+                "Based on audio length, try to ensure you speak clearly and elaborate on key points."
+            ]
+            
+            return FeedbackResponse(
+                score=score,
+                improvements=improvements,
+                transcript="(Transcription unavailable during fallback mode. Please install ffmpeg on the server.)",
+                ideal_explanation=f"An ideal explanation for {topic} covers the core definition, historical context, and modern applications."
+            )
 
 if __name__ == "__main__":
     import uvicorn
