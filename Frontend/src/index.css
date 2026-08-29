@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+
+:root {
+  /* Color Palette - Coral Claymorphism */
+  --bg-page: #ffe8e8;
+  /* Pastel pink/cream requested by user */
+  --bg-panel: #ffffff;
+  /* White clay panels */
+
+  --text-primary: #4a3b3b;
+  /* Dark brown/grey */
+  --text-secondary: #8c6b6b;
+  /* Muted reddish-grey */
+
+  --accent-coral: #ec7a7b;
+  /* The primary coral pink from reference */
+  --accent-coral-hover: #e56a6b;
+
+  --accent-yellow: #fcd34d;
+  --accent-blue: #60a5fa;
+  --accent-green: #34d399;
+
+  --success: #34d399;
+  --danger: #f87171;
+
+  /* Typography */
+  font-family: 'Nunito', system-ui, -apple-system, sans-serif;
+  line-height: 1.5;
+  font-weight: 600;
+
+  color-scheme: light;
+  color: var(--text-primary);
+  background-color: var(--bg-page);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  place-items: center;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--bg-page);
+  /* Optional subtle grid or dot pattern could go here, but keeping it clean for the clay look */
+}
+
+#root {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+  color: var(--text-primary);
+}
+
+/* 3D Claymorphism Panel Utility */
+.clay-panel {
+  background: var(--bg-panel);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 12px 12px 24px rgba(255, 180, 180, 0.6); /* Soft pink drop shadow only */
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* 3D Claymorphism Button Utility */
+.clay-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  padding: 0.875rem 2rem;
+  border-radius: 20px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  cursor: pointer;
+  border: none;
+  outline: none;
+  transition: all 0.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+  color: white;
+
+  /* Default to Coral accent */
+  background: var(--accent-coral);
+  box-shadow:
+    6px 6px 12px rgba(236, 122, 123, 0.4),
+    -4px -4px 10px #ffffff,
+    inset -3px -3px 6px rgba(0, 0, 0, 0.1),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.4);
+}
+
+.clay-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    8px 8px 16px rgba(236, 122, 123, 0.5),
+    -6px -6px 12px #ffffff,
+    inset -3px -3px 6px rgba(0, 0, 0, 0.1),
+    inset 3px 3px 6px rgba(255, 255, 255, 0.4);
+}
+
+.clay-button:active:not(:disabled) {
+  transform: translateY(2px) scale(0.98);
+  box-shadow:
+    2px 2px 4px rgba(236, 122, 123, 0.4),
+    -2px -2px 4px #ffffff,
+    inset 4px 4px 8px rgba(0, 0, 0, 0.15),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.2);
+}
+
+.clay-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Secondary Button (White clay) */
+.clay-button.secondary {
+  background: var(--bg-panel);
+  color: var(--accent-coral);
+  box-shadow:
+    6px 6px 12px rgba(224, 210, 210, 0.6),
+    -4px -4px 10px #ffffff,
+    inset -3px -3px 6px rgba(0, 0, 0, 0.03),
+    inset 3px 3px 6px rgba(255, 255, 255, 1);
+}
+
+.clay-button.secondary:hover:not(:disabled) {
+  box-shadow:
+    8px 8px 16px rgba(224, 210, 210, 0.6),
+    -6px -6px 12px #ffffff,
+    inset -3px -3px 6px rgba(0, 0, 0, 0.03),
+    inset 3px 3px 6px rgba(255, 255, 255, 1);
+}
+
+.clay-button.secondary:active:not(:disabled) {
+  box-shadow:
+    2px 2px 4px rgba(224, 210, 210, 0.6),
+    -2px -2px 4px #ffffff,
+    inset 4px 4px 8px rgba(0, 0, 0, 0.05),
+    inset -4px -4px 8px rgba(255, 255, 255, 0.5);
+}
+
+/* Classroom Illustration layout */
+.classroom-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  min-height: 60vh;
+}
+
+.teacher-illustration {
+  position: absolute;
+  left: -150px;
+  bottom: 0px;
+  width: 250px;
+  z-index: 20;
+  filter: drop-shadow(4px 10px 15px rgba(236, 122, 123, 0.2));
+}
+
+.students-illustration {
+  position: absolute;
+  right: -120px;
+  bottom: -20px;
+  width: 220px;
+  z-index: 20;
+  filter: drop-shadow(4px 10px 15px rgba(236, 122, 123, 0.2));
+}
+
+@media (max-width: 900px) {
+  .teacher-illustration {
+    left: -80px;
+    width: 180px;
+    bottom: 20px;
+  }
+
+  .students-illustration {
+    right: -60px;
+    width: 160px;
+    bottom: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+
+  .teacher-illustration,
+  .students-illustration {
+    display: none;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(236, 122, 123, 0.3);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(236, 122, 123, 0.6);
+}
