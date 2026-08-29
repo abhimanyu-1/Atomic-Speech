@@ -14,7 +14,7 @@ app = FastAPI()
 # Allow CORS for local development
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, specify the frontend domain
+    allow_origins=["https://atomic-speech.vercel.app"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
