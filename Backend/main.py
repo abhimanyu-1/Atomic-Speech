@@ -1,15 +1,22 @@
 import os
 import random
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from typing import Optional
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Load environment variables
 load_dotenv()
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # Allow CORS for local development
 app.add_middleware(
@@ -83,7 +90,8 @@ async def get_categories():
     return {"categories": list(TOPICS_DB.keys())}
 
 @app.get("/topics/random")
-async def get_random_topic(category: Optional[str] = None):
+@limiter.limit("30/minute")
+async def get_random_topic(request: Request, category: Optional[str] = None):
     if category and category in TOPICS_DB:
         topic = random.choice(TOPICS_DB[category])
     else:
@@ -93,7 +101,8 @@ async def get_random_topic(category: Optional[str] = None):
     return {"topic": topic}
 
 @app.post("/analyze", response_model=FeedbackResponse)
-async def analyze_speech(audio: UploadFile = File(...), topic: str = Form(...)):
+@limiter.limit("10/day")
+async def analyze_speech(request: Request, audio: UploadFile = File(...), topic: str = Form(...)):
     from google import genai
     from google.genai import types
     import json
@@ -115,23 +124,32 @@ async def analyze_speech(audio: UploadFile = File(...), topic: str = Form(...)):
         4. Provide a concise, ideal 1-minute explanation of the topic to show the speaker how it could be explained perfectly.
         """
         
+        # Get the actual MIME type of the uploaded file (which handles iOS audio/mp4 vs PC audio/webm)
+        mime_type = audio.content_type or 'audio/webm'
+        # Gemini does not like codecs parameters, so we strip them out if they exist (e.g., audio/webm;codecs=opus)
+        if ';' in mime_type:
+            mime_type = mime_type.split(';')[0]
+            
         # Use Gemini native multi-modal capabilities by passing the audio bytes directly
         audio_part = types.Part.from_bytes(
             data=audio_content,
-            mime_type='audio/webm'
+            mime_type=mime_type
         )
         
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=[
-                audio_part,
-                prompt
-            ],
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                response_schema=FeedbackResponse,
+        def call_gemini():
+            return client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=[
+                    audio_part,
+                    prompt
+                ],
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    response_schema=FeedbackResponse,
+                )
             )
-        )
+        
+        response = await run_in_threadpool(call_gemini)
         
         print("Received successful response from Gemini!")
         return response.parsed

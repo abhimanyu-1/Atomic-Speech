@@ -198,10 +198,24 @@ h3 {
 }
 
 @media (max-width: 600px) {
+  .teacher-illustration {
+    display: block;
+    right: auto;
+    left: -40px;
+    bottom: -50px;
+    top: auto;
+    width: 130px;
+    z-index: 20;
+  }
 
-  .teacher-illustration,
   .students-illustration {
-    display: none;
+    display: block;
+    left: auto;
+    right: -10px;
+    top: -70px;
+    bottom: auto;
+    width: 130px;
+    z-index: 20;
   }
 }
 

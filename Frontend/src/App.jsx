@@ -65,7 +65,9 @@ function App() {
 
     try {
       const formData = new FormData();
-      formData.append("audio", audioBlob, "speech.webm");
+      const mimeType = audioBlob.type || 'audio/webm';
+      const extension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+      formData.append("audio", audioBlob, `speech.${extension}`);
       formData.append("topic", topic);
 
       const response = await fetch(`${API_URL}/analyze`, {
@@ -140,7 +142,7 @@ function App() {
               position: 'relative', 
               zIndex: 10 
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0 1rem', boxSizing: 'border-box' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', boxSizing: 'border-box' }}>
                 <h1 style={{
                   fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
                   margin: 0,
@@ -152,12 +154,12 @@ function App() {
                 }}>
                   AtomicSpeak
                 </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 4vw, 1.25rem)', margin: 0, fontWeight: 700, padding: '0 1rem' }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 4vw, 1.25rem)', margin: 0, fontWeight: 700 }}>
                   One minute. One topic. One step better.
                 </p>
               </div>
 
-              <div style={{ width: '100%', maxWidth: '350px', padding: '0 1rem', boxSizing: 'border-box' }}>
+              <div style={{ width: '100%', maxWidth: '350px', boxSizing: 'border-box' }}>
                 <label style={{ display: 'block', marginBottom: '0.75rem', color: 'var(--text-primary)', fontWeight: 800, fontSize: '1.05rem', textAlign: 'left' }}>
                   Select a Field of Study:
                 </label>
@@ -177,7 +179,8 @@ function App() {
                       boxShadow: 'inset 2px 2px 5px rgba(0,0,0,0.02), inset -2px -2px 5px rgba(255,255,255,1)',
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'center',
+                      boxSizing: 'border-box'
                     }}
                   >
                     <span>{selectedCategory || (categories.length === 0 ? "Loading categories..." : "Select a category")}</span>
@@ -202,8 +205,10 @@ function App() {
                           borderRadius: '16px',
                           boxShadow: '0 10px 25px rgba(236,122,123,0.2)',
                           zIndex: 50,
-                          overflow: 'hidden',
-                          transformOrigin: 'top center'
+                          overflowY: 'auto',
+                          maxHeight: '220px',
+                          transformOrigin: 'top center',
+                          boxSizing: 'border-box'
                         }}
                       >
                         {categories.map(cat => (

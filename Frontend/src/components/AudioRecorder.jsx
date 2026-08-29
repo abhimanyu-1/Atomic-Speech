@@ -35,7 +35,8 @@ export const AudioRecorder = ({ onRecordingComplete, isAnalyzing }) => {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const mimeType = mediaRecorderRef.current.mimeType || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         onRecordingComplete(audioBlob);
         stream.getTracks().forEach(track => track.stop());
       };
