@@ -15,6 +15,8 @@ const STATES = {
   RESULT: 'RESULT',
 };
 
+const API_URL = import.meta.env.VITE_API_URL || 'https://atomic-speech.onrender.com';
+
 function App() {
   const [appState, setAppState] = useState(STATES.IDLE);
   const [topic, setTopic] = useState('');
@@ -28,7 +30,7 @@ function App() {
     // Fetch categories on mount
     const fetchCategories = async () => {
       try {
-        const response = await fetch('http://localhost:8000/categories');
+        const response = await fetch(`${API_URL}/categories`);
         const data = await response.json();
         setCategories(data.categories);
         if (data.categories.length > 0) {
@@ -44,8 +46,8 @@ function App() {
   const fetchTopic = async () => {
     try {
       const url = selectedCategory
-        ? `http://localhost:8000/topics/random?category=${encodeURIComponent(selectedCategory)}`
-        : 'http://localhost:8000/topics/random';
+        ? `${API_URL}/topics/random?category=${encodeURIComponent(selectedCategory)}`
+        : `${API_URL}/topics/random`;
 
       const response = await fetch(url);
       const data = await response.json();
@@ -66,7 +68,7 @@ function App() {
       formData.append("audio", audioBlob, "speech.webm");
       formData.append("topic", topic);
 
-      const response = await fetch('http://localhost:8000/analyze', {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: 'POST',
         body: formData,
       });
