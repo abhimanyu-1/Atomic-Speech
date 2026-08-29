@@ -69,6 +69,11 @@ class FeedbackResponse(BaseModel):
     transcript: str
     ideal_explanation: str
 
+@app.get("/ping")
+async def ping():
+    """Lightweight health endpoint for Render keep-alive pings."""
+    return {"status": "ok"}
+
 @app.get("/categories")
 async def get_categories():
     return {"categories": list(TOPICS_DB.keys())}
