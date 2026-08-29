@@ -69,6 +69,10 @@ class FeedbackResponse(BaseModel):
     transcript: str
     ideal_explanation: str
 
+@app.get("/")
+async def read_root():
+    return {"status": "Atomic Speech API is live"}
+
 @app.get("/ping")
 async def ping():
     """Lightweight health endpoint for Render keep-alive pings."""
