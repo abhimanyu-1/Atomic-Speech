@@ -140,23 +140,24 @@ function App() {
               position: 'relative', 
               zIndex: 10 
             }}>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', width: '100%', padding: '0 1rem', boxSizing: 'border-box' }}>
                 <h1 style={{
-                  fontSize: '4.5rem',
+                  fontSize: 'clamp(2.5rem, 8vw, 4.5rem)',
                   margin: 0,
                   color: 'var(--accent-coral)',
                   fontWeight: 900,
                   letterSpacing: '-0.05em',
-                  textShadow: '2px 2px 4px rgba(236,122,123,0.3)'
+                  textShadow: '2px 2px 4px rgba(236,122,123,0.3)',
+                  lineHeight: 1.1
                 }}>
                   AtomicSpeak
                 </h1>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '1.25rem', margin: 0, fontWeight: 700 }}>
+                <p style={{ color: 'var(--text-secondary)', fontSize: 'clamp(1rem, 4vw, 1.25rem)', margin: 0, fontWeight: 700, padding: '0 1rem' }}>
                   One minute. One topic. One step better.
                 </p>
               </div>
 
-              <div style={{ width: '100%', maxWidth: '350px' }}>
+              <div style={{ width: '100%', maxWidth: '350px', padding: '0 1rem', boxSizing: 'border-box' }}>
                 <label style={{ display: 'block', marginBottom: '0.75rem', color: 'var(--text-primary)', fontWeight: 800, fontSize: '1.05rem', textAlign: 'left' }}>
                   Select a Field of Study:
                 </label>
