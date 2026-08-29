@@ -141,7 +141,7 @@ async def analyze_speech(request: Request, audio: UploadFile = File(...), topic:
         @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
         def call_gemini():
             return client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-1.5-flash',
                 contents=[
                     audio_part,
                     prompt
