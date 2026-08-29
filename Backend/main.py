@@ -141,7 +141,7 @@ async def analyze_speech(request: Request, audio: UploadFile = File(...), topic:
         @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=2, max=10))
         def call_gemini():
             return client.models.generate_content(
-                model='gemini-1.5-flash',
+                model='gemini-2.5-flash',
                 contents=[
                     audio_part,
                     prompt
@@ -158,11 +158,19 @@ async def analyze_speech(request: Request, audio: UploadFile = File(...), topic:
         return response.parsed
         
     except Exception as e:
-        print(f"Error calling Gemini API: {e}")
+        error_msg = str(e)
+        if hasattr(e, 'last_attempt') and e.last_attempt is not None:
+            actual_exc = e.last_attempt.exception()
+            if actual_exc:
+                error_msg = str(actual_exc)
+                if hasattr(actual_exc, 'message'):
+                    error_msg = actual_exc.message
+        
+        print(f"Error calling Gemini API: {error_msg}")
         # Fallback response in case of error
         return FeedbackResponse(
             score=0,
-            improvements=[f"Failed to analyze audio with Gemini AI: {str(e)}"],
+            improvements=[f"Failed to analyze audio with Gemini AI: {error_msg}"],
             transcript="(Failed to transcribe due to API error)",
             ideal_explanation="Failed to generate ideal explanation due to API error."
         )
